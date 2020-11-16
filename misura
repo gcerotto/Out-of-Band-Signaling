@@ -1,0 +1,27 @@
+#!/bin/bash
+
+array=( $( cat $@ | grep 'SECRET' | while read line; do
+  ID=$(echo $line | cut -d ' ' -f 2)
+  SECRET=$(echo $line | cut -d ' ' -f 4)
+  GUESS=$(cat $@ | grep -e "$ID.BASED" | tail -n 1 | cut -d ' ' -f 3)
+  if [ -n "$GUESS" ] ; then
+    DIFF=$(($SECRET-$GUESS))
+    echo ${DIFF#-}
+  fi
+done) )
+# < <(cat $@ | grep 'SECRET')
+
+NEL=${#array[@]}
+if [ $NEL -gt 0 ] ; then
+  for i in ${array[@]} ; do
+    if [ $i -le 25 ] ; then
+      count=$(($count + 1))
+    fi
+  err=$(($err + $i))
+  done
+
+err=$(($err/$NEL))
+cent=$(($count * 100 / $NEL))
+
+echo Sono stati stimati correttamente $count secret su $NEL, ovvero il $cent%, l\'errore medio è $err
+fi
